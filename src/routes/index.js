@@ -59,7 +59,7 @@ router.post('/add-dessert', (req, res, next) => {
 
     isDev ? AWS.config.update(config.aws_local_config) : AWS.config.update(config.aws_remote_config);
     
-    const { name, description } = req.query;
+    const { dessert, description } = req.query;
    
     const dessertId = (Math.random() * 1000).toString();
     const docClient = new AWS.DynamoDB.DocumentClient();
@@ -68,7 +68,7 @@ router.post('/add-dessert', (req, res, next) => {
         TableName: config.aws_table_name,
         Item: {
             'dessertId': dessertId,
-            'name': name,
+            'dessert': dessert,
             'description': description
         }
     };
