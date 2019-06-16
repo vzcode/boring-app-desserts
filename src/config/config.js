@@ -1,5 +1,5 @@
 module.exports = {
-    aws_table_name: 'ba-entrees',
+    aws_table_name: 'ba-desserts',
     aws_local_config: {
         region: 'local',
         endpoint: 'http://localhost:8000'

@@ -1,14 +1,14 @@
 {
-    "TableName": "Entrees",
+    "TableName": "ba-desserts",
     "KeySchema": [
         {
-            "AttributeName": "entreeId",
+            "AttributeName": "dessertId",
             "KeyType": "HASH"
         }
     ],
     "AttributeDefinitions": [
         {
-            "AttributeName": "entreeId",
+            "AttributeName": "dessertId",
             "AttributeType": "S"
         }
     ],

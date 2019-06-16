@@ -14,7 +14,7 @@ XRay.config([XRay.plugins.EC2Plugin]);
 console.log(`This is the local env: ${isDev}`);
 
 // Health Check
-router.use(XRay.express.openSegment('entreesApiHealth'));
+router.use(XRay.express.openSegment('dessertsApiHealth'));
 router.get('/', (req, res) => {
     res.set('Content-Type', 'application/json');
     let data = {
@@ -24,8 +24,8 @@ router.get('/', (req, res) => {
 })
 router.use(XRay.express.closeSegment());
 
-router.use(XRay.express.openSegment('getEntrees'));
-router.get('/entrees', (req, res, next) => {
+router.use(XRay.express.openSegment('getDesserts'));
+router.get('/desserts', (req, res, next) => {
     
     isDev ? AWS.config.update(config.aws_local_config) : AWS.config.update(config.aws_remote_config);
 
@@ -45,29 +45,29 @@ router.get('/entrees', (req, res, next) => {
                 const { Items } = data;
                 res.send({ 
                     success: true,
-                    message: 'Loaded entrees',
-                    entrees: Items
+                    message: 'Loaded desserts',
+                    desserts: Items
                 });
             }
         })}
 );
 router.use(XRay.express.closeSegment());
 
-router.use(XRay.express.openSegment('addEntree'));
+router.use(XRay.express.openSegment('addDessert'));
 
-router.post('/add-entree', (req, res, next) => {
+router.post('/add-dessert', (req, res, next) => {
 
     isDev ? AWS.config.update(config.aws_local_config) : AWS.config.update(config.aws_remote_config);
     
     const { name, description } = req.query;
    
-    const entreeId = (Math.random() * 1000).toString();
+    const dessertId = (Math.random() * 1000).toString();
     const docClient = new AWS.DynamoDB.DocumentClient();
     
     const params = {
         TableName: config.aws_table_name,
         Item: {
-            'entreeId': entreeId,
+            'dessertId': dessertId,
             'name': name,
             'description': description
         }
@@ -84,8 +84,8 @@ router.post('/add-entree', (req, res, next) => {
             const { Items } = data;
             res.send({
                 success: true,
-                message: 'Added entree',
-                entreeId: entreeId
+                message: 'Added dessert',
+                dessertId: dessertId
             });
         }
     });
