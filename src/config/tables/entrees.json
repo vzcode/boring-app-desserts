@@ -1,0 +1,19 @@
+{
+    "TableName": "Entrees",
+    "KeySchema": [
+        {
+            "AttributeName": "entreeId",
+            "KeyType": "HASH"
+        }
+    ],
+    "AttributeDefinitions": [
+        {
+            "AttributeName": "entreeId",
+            "AttributeType": "S"
+        }
+    ],
+    "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+    }
+}
