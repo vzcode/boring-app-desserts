@@ -1,96 +1,93 @@
 const express = require('express');
-const AWS = require('aws-sdk');
-const XRay = require('aws-xray-sdk');
- 
-
-const config = require('../config/config');
+const AWSXray = require('aws-xray-sdk');
+const AWS = AWSXray.captureAWS(require('aws-sdk'));
+ const config = require('../config/config');
 var isDev = process.env.NODE_ENV !== 'production';
 isDev = false;
 const router = express.Router();
-const app = express();
 
-XRay.config([XRay.plugins.EC2Plugin]);
-
-console.log(`This is the local env: ${isDev}`);
 
 // Health Check
-router.use(XRay.express.openSegment('dessertsApiHealth'));
 router.get('/', (req, res) => {
+    AWSXray.captureFunc('dessertsApiHealth', function (subsegment) {
     res.set('Content-Type', 'application/json');
-    let data = {
-        message: 'API: Up'
-    };
-    res.send(JSON.stringify(data, null, 2));
+        let data = {
+            message: 'Dessert API: Up'
+        };
+        res.send(JSON.stringify(data, null, 2));
+        subsegment.close();
+    })
 })
-router.use(XRay.express.closeSegment());
 
-router.use(XRay.express.openSegment('getDesserts'));
+
 router.get('/desserts', (req, res, next) => {
-    
-    isDev ? AWS.config.update(config.aws_local_config) : AWS.config.update(config.aws_remote_config);
+    AWSXray.captureFunc('dessertsApiHealth', function (subsegment) {
+        isDev ? AWS.config.update(config.aws_local_config) : AWS.config.update(config.aws_remote_config);
 
-    const docClient = new AWS.DynamoDB.DocumentClient();
+        const docClient = new AWS.DynamoDB.DocumentClient();
 
-    const params = {
-        TableName: config.aws_table_name
-    }
+        const params = {
+            TableName: config.aws_table_name
+        }
 
-    docClient.scan(params, function(err,data) {
-        if (err) {
-            res.send({
-                success: false,
-                message: 'Error: Server error'
-            });
-        } else {
-                const { Items } = data;
-                res.send({ 
-                    success: true,
-                    message: 'Loaded desserts',
-                    desserts: Items
+        docClient.scan(params, function(err,data) {
+            if (err) {
+                res.send({
+                    success: false,
+                    message: 'Error: Server error'
                 });
-            }
-        })}
-);
-router.use(XRay.express.closeSegment());
+            } else {
+                    const { Items } = data;
+                    res.send({ 
+                        success: true,
+                        message: 'Loaded desserts',
+                        desserts: Items
+                    });
+                    }
+        })
+    subsegment.close();
+    })
+});
 
-router.use(XRay.express.openSegment('addDessert'));
+
 
 router.post('/add-dessert', (req, res, next) => {
-
-    isDev ? AWS.config.update(config.aws_local_config) : AWS.config.update(config.aws_remote_config);
+    AWSXray.captureFunc('addDessert', function(subsegment) {
+        isDev ? AWS.config.update(config.aws_local_config) : AWS.config.update(config.aws_remote_config);
+        
+        const { dessert, description } = req.query;
     
-    const { dessert, description } = req.query;
-   
-    const dessertId = (Math.random() * 1000).toString();
-    const docClient = new AWS.DynamoDB.DocumentClient();
-    
-    const params = {
-        TableName: config.aws_table_name,
-        Item: {
-            'dessertId': dessertId,
-            'dessert': dessert,
-            'description': description
-        }
-    };
-    docClient.put(params, function (err, data) {
-        console.log(req.body);
-        if (err) {
-            res.send({
-                success: false,
-                message: 'Error: Can not add item'
-            });
-        } else {
-            console.log('data', data);
-            const { Items } = data;
-            res.send({
-                success: true,
-                message: 'Added dessert',
-                dessertId: dessertId
-            });
-        }
+        const dessertId = (Math.random() * 1000).toString();
+        const docClient = new AWS.DynamoDB.DocumentClient();
+        
+        const params = {
+            TableName: config.aws_table_name,
+            Item: {
+                'dessertId': dessertId,
+                'dessert': dessert,
+                'description': description
+            }
+        };
+        docClient.put(params, function (err, data) {
+            console.log(req.body);
+            if (err) {
+                res.send({
+                    success: false,
+                    message: 'Error: Can not add item'
+                });
+            } else {
+                console.log('data', data);
+                const { Items } = data;
+                res.send({
+                    success: true,
+                    message: 'Added dessert',
+                    dessertId: dessertId
+                });
+            }
+        });
+        subsegment.close();
     });
 });
-router.use(XRay.express.closeSegment());
 
 
 module.exports = router;
