@@ -21,7 +21,7 @@ router.get('/', (req, res) => {
 
 
 router.get('/desserts', (req, res, next) => {
-    AWSXray.captureFunc('dessertsApiHealth', function (subsegment) {
+    AWSXray.captureFunc('getDesserts', function (subsegment) {
         isDev ? AWS.config.update(config.aws_local_config) : AWS.config.update(config.aws_remote_config);
 
         const docClient = new AWS.DynamoDB.DocumentClient();
