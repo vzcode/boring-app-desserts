@@ -4,7 +4,7 @@ const AWSXray = require('aws-xray-sdk');
 
 
 router.get('/desserts', require('./desserts'));
-router.post('/add-dessert', require('./desserts'));
+// router.post('/add-dessert', require('./desserts'));
 
 // Health Check
 router.get('/', (req, res) => {
